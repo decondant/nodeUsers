@@ -1,4 +1,4 @@
-  
+   
 const ansyncHandler = require("express-async-handler");
 const Contact = require("../models/contactModel");
 
@@ -16,7 +16,7 @@ const createContact = ansyncHandler ( async (req, res) => {
     const {name, email, phone} = req.body;
     if (!name || !email || !phone) {
         res.status(400);
-        throw new Error("All fields are required!")   
+        throw new Error("All fields are required!");   
     }
     const contact = await Contact.create({
         name, email, phone,
@@ -25,15 +25,42 @@ const createContact = ansyncHandler ( async (req, res) => {
 });
 
 const getContact = ansyncHandler ( async (req, res) => {
-    res.status(200).json({message: `Get contact for ${req.params.id}`});
+    const contact = await Contact.findById(req.params.id);
+    if (contact) {
+        res.status(200).json(contact);
+    }
+
+    res.status(404);
+    throw new Error("Contact not found!");    
+ 
 });
 
 const updateContact = ansyncHandler ( async (req, res) => {
-    res.status(200).json({message: `Update contact for ${req.params.id}`});
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+        res.status(400);
+        //process.exit(1);
+   //     console.log("Error");
+        throw new Error("Contact not found!");
+    }
+     const updatedContact = await Contact.findByIdAndUpdate(
+         req.params.id,
+         req.body,
+         {new: true}
+     );
+    res.status(200).json(updatedContact);
 });
 
 const deleteContact = ansyncHandler ( async (req, res) => {
-    res.status(200).json({message: `Delete contact for ${req.params.id}`});
+    const contact = await Contact.findById(req.params.id);
+    if (!contact) {
+        res.status(400);
+        //process.exit(1);
+   //     console.log("Error");
+        throw new Error("Contact not found!");
+    }
+    await Contact.remove();    
+    res.status(200).json(contact);
 });
 
 
